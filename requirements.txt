@@ -4,3 +4,4 @@ python-docx
 requests
 openai
 python-dotenv
+flask-limiter

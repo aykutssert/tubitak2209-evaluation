@@ -5,10 +5,19 @@ import json
 from extract import extract_full_2209a_structure
 from evaluation import evaluate
 from flask_cors import CORS
-
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 CORS(app)
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["2 per day"]
+)
+
+
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -18,6 +27,7 @@ def index():
     return render_template("index.html")  # templates klasöründen index.html yüklenir
 
 @app.route("/upload", methods=["POST"])
+@limiter.limit("2 per day")
 def upload():
     if 'file' not in request.files:
         return jsonify({"error": "Dosya yüklenemedi"}), 400
