@@ -7,15 +7,17 @@ from evaluation import evaluate
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_limiter.errors import RateLimitExceeded
+
 
 app = Flask(__name__)
 CORS(app)
 
 limiter = Limiter(
     get_remote_address,
-    app=app,
-    default_limits=["2 per day"]
+    app=app
 )
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RUBRIC_PATH = os.path.join(BASE_DIR, "newRubric.json")
@@ -25,12 +27,21 @@ RUBRIC_PATH = os.path.join(BASE_DIR, "newRubric.json")
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
+
+
+@app.errorhandler(RateLimitExceeded)
+def ratelimit_handler(e):
+    return jsonify({"error": "Günlük istek limitine ulaştınız. Lütfen yarın tekrar deneyin."}), 429
+
+
+
 @app.route("/")
 def index():
     return render_template("index.html")  # templates klasöründen index.html yüklenir
 
 @app.route("/upload", methods=["POST"])
-@limiter.limit("2 per day")
+@limiter.limit("1 per day")
 def upload():
     if 'file' not in request.files:
         return jsonify({"error": "Dosya yüklenemedi"}), 400
