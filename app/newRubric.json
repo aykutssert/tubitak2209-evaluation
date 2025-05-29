@@ -1,0 +1,53 @@
+{
+  "GENEL BİLGİLER": [
+    "Başvuru sahibinin adı soyadı var mı?",
+    "Araştırma önerisinin başlığı var mı?",
+    "Danışmanın adı soyadı var mı?",
+    "Araştırmanın yürütüleceği kurum var mı?"
+  ],
+  "ÖZET": [
+    "Özet bölümünde özgün değerle ilgili bilgi var mı?",
+    "Özet bölümünde yöntemle ilgili bilgi var mı?",
+    "Özet bölümünde yönetim kısmına dair bilgi var mı?",
+    "Özet bölümünde yaygın etki ile ilgili bilgi var mı?"
+  ],
+  "1.1 Konunun Önemi, Özgün Değeri ve Hipotezi": [
+    "Araştırmanın bilimsel ve özgün değeri açıkça ifade edilmiş mi?",
+    "Literatürdeki eksiklik(ler) veya sorun(lar) net bir şekilde tanımlanmış mı?",
+    "Araştırma problemi veya varsa hipotezi açıkça ortaya konmuş mu?",
+    "İddialar, literatüre yapılan atıflarla desteklenmiş mi?"
+  ],
+  "1.2 Amaç ve Hedefler": [
+    "Araştırmanın amacı açık ve anlaşılır şekilde tanımlanmış mı?",
+    "Hedefler ölçülebilir, gerçekçi ve proje süresince ulaşılabilir nitelikte mi?"
+  ],
+  "YÖNTEM": [
+    "Uygulanacak yöntem ve araştırma teknikleri açıkça tanımlanmış mı?",
+    "Yöntem ve tekniklerin amaç ve hedeflere ulaşmak için uygunluğu açıklanmış mı?",
+    "Araştırma tasarımı, değişkenler ve istatistiksel analiz yöntemleri tanımlanmış mı?",
+    "Varsa ön çalışma, fizibilite veya iş paketleriyle ilişkilendirme yapılmış mı?"
+  ],
+  "3.1 İş-Zaman Çizelgesi": [
+    "Tabloda tanımlanmış iş paketleri için açıklamalar yapılmış mı?",
+    "Tanımlanmış tüm iş paketleri için başarı ölçütleri ölçülebilir ve izlenebilir şekilde belirtilmiş mi?",
+    "Literatür taraması, rapor yazımı ve benzeri rutin işler iş paketi olarak gösterilmiş mi? (Gösterilmemişse cevap 'Evet' olmalı)"
+  ],
+  "3.2 Risk Yönetimi": [
+    "Risk tanımlanan iş paketleri açıkça belirtilmiş mi? (Risk yoksa cevap 'Evet' olmalı)",
+    "Risk tanımlanan iş paketleri için uygulanabilir bir B planı sunulmuş mu? (Risk varsa B planı da olmalı)"
+  ],
+  "3.3 Araştırma olanakları": [
+    "Projede kullanılacak altyapı, laboratuvar ve ekipman olanakları açıkça belirtilmiş mi?"
+  ],
+  "4. YAYGIN ETKİ": [
+    "Bilimsel veya akademik etkiler belirtilmiş mi?",
+    "Ekonomik, sosyal veya ticari etkiler açıklanmış mı?",
+    "Yeni proje veya araştırmacı yetiştirme yönünde etkiler var mı?",
+    "Beklenen çıktı, sonuç ve etkiler net bir şekilde tanımlanmış mı?"
+  ],
+  "BÜTÇE TALEP ÇİZELGESİ": [
+    "Talep edilen bütçe kalemleri (varsa) açık, gerekçeli ve proje ihtiyaçlarıyla tutarlı mı?",
+    "Yalnızca ihtiyaç duyulan bütçe kalemlerine yer verilmiş mi?",
+    "Toplam bütçe, proje kapsamında öngörülen faaliyetlerle uyumlu bir düzeyde mi?"
+  ]
+}
