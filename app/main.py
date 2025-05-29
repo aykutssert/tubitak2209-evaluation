@@ -17,6 +17,9 @@ limiter = Limiter(
     default_limits=["2 per day"]
 )
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+RUBRIC_PATH = os.path.join(BASE_DIR, "newRubric.json")
+
 
 
 UPLOAD_FOLDER = "uploads"
@@ -46,7 +49,7 @@ def upload():
        
 
         # Değerlendirme kurallarını yükle
-        with open("newRubric.json", "r", encoding="utf-8") as f:
+        with open(RUBRIC_PATH, "r", encoding="utf-8") as f:
             rubric = json.load(f)
 
 
