@@ -8,5 +8,5 @@ flask-limiter
 firebase-admin
 sentence-transformers
 numpy
-sklearn
+scikit-learn
 
