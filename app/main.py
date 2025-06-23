@@ -22,8 +22,13 @@ limiter = Limiter(
     app=app
 )
 
-# Firebase Admin SDK initialization
-cred = credentials.Certificate('firebase-service.json')
+# Firebase Admin SDK initialization from env variable
+firebase_cred_json = os.environ.get("FIREBASE_CREDENTIALS")
+if not firebase_cred_json:
+    raise ValueError("FIREBASE_CREDENTIALS environment variable not set")
+
+cred_dict = json.loads(firebase_cred_json)
+cred = credentials.Certificate(cred_dict)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
