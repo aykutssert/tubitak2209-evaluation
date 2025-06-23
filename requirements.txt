@@ -5,3 +5,8 @@ requests
 openai
 python-dotenv
 flask-limiter
+firebase-admin
+sentence-transformers
+numpy
+sklearn
+
