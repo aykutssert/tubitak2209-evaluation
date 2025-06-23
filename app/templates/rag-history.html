@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>RAG History - 2209-A Project</title>
+    <style>
+        body {
+            background-color: #1c1c1c;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 90%;
+            margin: auto;
+        }
+
+        h1, h2 {
+            color: #ffffff;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #2c2c2c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #f0f0f0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #3a3a3a;
+        }
+
+        .nav-links a.active {
+            background-color: #4CAF50;
+        }
+        .nav-links a.active:hover {
+            background-color: #45a049;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background-color: #ff6666;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff4444;
+        }
+
+        .auth-loading {
+            display: none;
+            text-align: center;
+            color: #aaffaa;
+            padding: 20px;
+        }
+
+        /* RAG Container */
+        .rag-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            height: 80vh;
+        }
+
+        .rag-list {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .rag-list h3 {
+            color: #aaffaa;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .rag-item {
+            background-color: #3a3a3a;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-left: 4px solid #2196F3;
+        }
+
+        .rag-item:hover {
+            background-color: #4a4a4a;
+        }
+
+        .rag-item.selected {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .rag-item .rag-title {
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .rag-item .rag-date {
+            font-size: 11px;
+            color: #aaffaa;
+            margin-bottom: 3px;
+        }
+
+        .rag-item .rag-similarity {
+            font-size: 12px;
+            color: #81C784;
+            margin-bottom: 3px;
+        }
+
+        .rag-item .rag-model {
+            font-size: 12px;
+            color: #dddddd;
+        }
+
+        .rag-item.selected .rag-date,
+        .rag-item.selected .rag-similarity,
+        .rag-item.selected .rag-model {
+            color: #ffffff;
+        }
+
+        .rag-detail {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .rag-detail h3 {
+            color: #aaffaa;
+            margin-top: 0;
+        }
+
+        .no-rag-selected {
+            text-align: center;
+            color: #aaffaa;
+            padding: 50px;
+        }
+
+        .rag-section {
+            background-color: #3a3a3a;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid #2196F3;
+            border-radius: 8px;
+        }
+
+        .rag-section h3 {
+            color: #aaffaa;
+            margin-top: 0;
+        }
+
+        .rag-question {
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .rag-answer {
+            background-color: #2c2c2c;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-line;
+            color: #dddddd;
+            margin-bottom: 10px;
+        }
+
+        .rag-best-section {
+            background-color: #2c2c2c;
+            padding: 10px;
+            border-radius: 4px;
+            color: #dddddd;
+            margin-bottom: 10px;
+            font-style: italic;
+            border-left: 3px solid #81C784;
+        }
+
+        .rag-info {
+            background-color: #3a3a3a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .rag-info div {
+            margin-bottom: 8px;
+            color: #aaffaa;
+        }
+
+        .similarity-score {
+            background-color: #81C784;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* RAG Header with Download Button */
+        .rag-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #3a3a3a;
+            border-radius: 8px;
+        }
+
+        .rag-header h3 {
+            margin: 0;
+            color: #aaffaa;
+        }
+
+        .download-btn {
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .download-btn:disabled {
+            background-color: #666666;
+            cursor: not-allowed;
+        }
+
+        .loading-message {
+            text-align: center;
+            color: #aaffaa;
+            padding: 20px;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #ff6666;
+            padding: 20px;
+        }
+
+        /* PDF specific styles */
+        .rag-section, .rag-info, .similarity-score {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .rag-section h3 {
+            page-break-after: avoid;
+            break-after: avoid;
+        }
+
+        .rag-question + .rag-answer {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        @media print {
+            .rag-section {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            
+            .rag-header .download-btn {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .rag-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .rag-list {
+                max-height: 300px;
+            }
+
+            .rag-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .download-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-loading" id="authLoading">
+        <p>🔄 Kullanıcı bilgileri yükleniyor...</p>
+    </div>
+
+    <div id="mainContent" style="display: none;">
+        <div class="navbar">
+            <div class="nav-links">
+                <a href="/">🏠 Home</a>
+                <a href="/settings">⚙️ Settings</a>
+                <a href="/projects">📋 Projects</a>
+                <a href="/rag-history" class="active">🔍 RAG History</a>
+            </div>
+            <div class="user-info">
+                <span>👤 <span id="displayUsername">Username</span></span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <h1>🔍 RAG Geçmişi</h1>
+        
+        <div class="rag-container">
+            <div class="rag-list">
+                <h3>RAG Listesi</h3>
+                <div id="ragList">
+                    <div class="loading-message">📄 RAG geçmişi yükleniyor...</div>
+                </div>
+            </div>
+            
+            <div class="rag-detail">
+                <div id="ragDetail" class="no-rag-selected">
+                    <h3>RAG Detayları</h3>
+                    <p>Detaylarını görmek için bir RAG sorgusu seçin.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, collection, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXAXWkvj-IOrJ1HeMxQyJXFVgugPMEFGo",
+            authDomain: "chat-app-d6748.firebaseapp.com",
+            projectId: "chat-app-d6748",
+            storageBucket: "chat-app-d6748.firebasestorage.app",
+            messagingSenderId: "619605529593",
+            appId: "1:619605529593:android:8fa09008aee1ad0112e328"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let selectedRAG = null;
+        let selectedRAGId = null;
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            const authLoading = document.getElementById('authLoading');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (user) {
+                authLoading.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+                document.getElementById('displayUsername').textContent = displayName;
+                
+                // RAG geçmişini yükle
+                loadRAGList();
+                
+            } else {
+                window.location.href = '/login';
+            }
+        });
+
+        // Logout fonksiyonu
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                localStorage.clear();
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Çıkış yapılırken hata oluştu');
+            }
+        };
+
+        // RAG listesini yükle
+        async function loadRAGList() {
+            try {
+                if (!currentUser) return;
+
+                const ragRef = collection(db, 'users', currentUser.uid, 'rags');
+                const q = query(ragRef, orderBy('createdAt', 'desc'), limit(100));
+                const querySnapshot = await getDocs(q);
+                
+                const ragList = document.getElementById('ragList');
+                ragList.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    ragList.innerHTML = '<div class="loading-message">📄 Henüz RAG geçmişi bulunmuyor.</div>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const rag = doc.data();
+                    const ragItem = createRAGListItem(rag, doc.id);
+                    ragList.appendChild(ragItem);
+                });
+
+            } catch (error) {
+                console.error('RAG listesi yüklenirken hata:', error);
+                document.getElementById('ragList').innerHTML = '<div class="error-message">❌ RAG listesi yüklenemedi.</div>';
+            }
+        }
+
+        // RAG liste öğesi oluştur
+        function createRAGListItem(rag, ragId) {
+            const div = document.createElement('div');
+            div.className = 'rag-item';
+            div.onclick = () => selectRAG(rag, ragId, div);
+
+            const date = rag.createdAt ? new Date(rag.createdAt.toDate()).toLocaleString('tr-TR') : 'Bilinmiyor';
+            const similarity = rag.similarity !== undefined ? `🎯 Benzerlik: ${(rag.similarity * 100).toFixed(1)}%` : '';
+
+            div.innerHTML = `
+                <div class="rag-title">📄 ${rag.fileName}</div>
+                <div class="rag-date">📅 ${date}</div>
+                <div class="rag-similarity">${similarity}</div>
+                <div class="rag-model">🤖 ${getModelDisplayName(rag.model)}</div>
+            `;
+
+            return div;
+        }
+
+        // RAG seç ve detayını göster
+        function selectRAG(rag, ragId, itemElement) {
+            // Önceki seçimi kaldır
+            document.querySelectorAll('.rag-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Yeni seçimi işaretle
+            itemElement.classList.add('selected');
+
+            // Geçerli RAG bilgilerini sakla
+            selectedRAG = rag;
+            selectedRAGId = ragId;
+
+            // RAG detayını göster
+            const ragDetail = document.getElementById('ragDetail');
+            ragDetail.innerHTML = '';
+            ragDetail.className = '';
+
+            showRAGDetails(rag, ragDetail);
+        }
+
+        // RAG detayını göster
+        function showRAGDetails(rag, container) {
+            const date = rag.createdAt ? new Date(rag.createdAt.toDate()).toLocaleString('tr-TR') : 'Bilinmiyor';
+            
+            // RAG header'ı (başlık ve indirme butonu)
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'rag-header';
+            headerDiv.innerHTML = `
+                <h3>🔍 RAG Detayları</h3>
+                <button class="download-btn" onclick="downloadRAGPDF()">
+                    📄 PDF İndir
+                </button>
+            `;
+            container.appendChild(headerDiv);
+
+            // PDF için ana container
+            const pdfContainer = document.createElement('div');
+            pdfContainer.id = 'ragPdfContainer';
+            container.appendChild(pdfContainer);
+            
+            // RAG bilgileri
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'rag-info';
+            
+            const matchedSections = rag.matchedSections !== undefined ? rag.matchedSections : 'Bilinmiyor';
+            const threshold = rag.threshold !== undefined ? rag.threshold : 'Bilinmiyor';
+            
+            infoDiv.innerHTML = `
+                <div><strong>📄 Dosya:</strong> ${rag.fileName}</div>
+                <div><strong>📅 Tarih:</strong> ${date}</div>
+                <div><strong>🤖 Model:</strong> ${getModelDisplayName(rag.model)}</div>
+                <div><strong>🎯 Eşleşen Bölüm:</strong> ${matchedSections}</div>
+                <div><strong>⚡ Eşik Değeri:</strong> ${threshold}</div>
+            `;
+            pdfContainer.appendChild(infoDiv);
+
+            // Benzerlik puanı
+            if (rag.similarity !== undefined) {
+                const scoreBox = document.createElement('div');
+                scoreBox.className = 'similarity-score';
+                scoreBox.textContent = `Benzerlik Puanı: ${(rag.similarity * 100).toFixed(1)}%`;
+                pdfContainer.appendChild(scoreBox);
+            }
+
+            // Soru-Cevap bölümü
+            const qaSectionDiv = document.createElement('div');
+            qaSectionDiv.className = 'rag-section';
+            qaSectionDiv.innerHTML = `<h3>💬 Soru & Cevap</h3>`;
+
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'rag-question';
+            questionDiv.textContent = `❓ Soru: ${rag.question}`;
+            qaSectionDiv.appendChild(questionDiv);
+
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'rag-answer';
+            answerDiv.textContent = rag.answer;
+            qaSectionDiv.appendChild(answerDiv);
+
+            pdfContainer.appendChild(qaSectionDiv);
+
+            // En iyi bölüm
+            if (rag.bestSection) {
+                const bestSectionDiv = document.createElement('div');
+                bestSectionDiv.className = 'rag-section';
+                bestSectionDiv.innerHTML = `<h3>📋 En İyi Eşleşen Bölüm</h3>`;
+
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'rag-best-section';
+                sectionDiv.textContent = rag.bestSection;
+                bestSectionDiv.appendChild(sectionDiv);
+
+                pdfContainer.appendChild(bestSectionDiv);
+            }
+        }
+
+        // PDF İndirme fonksiyonu
+        window.downloadRAGPDF = function() {
+            if (!selectedRAG) {
+                alert('Lütfen bir RAG sorgusu seçin');
+                return;
+            }
+
+            const downloadBtn = document.querySelector('.download-btn');
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '⏳ İndiriliyor...';
+
+            const fileName = selectedRAG.fileName || 'rag-query';
+            const cleanFileName = fileName.replace(/\.[^/.]+$/, "");
+            const date = new Date().toISOString().split('T')[0];
+            
+            const pdfContainer = document.getElementById('ragPdfContainer');
+            
+            if (!pdfContainer) {
+                alert('PDF içeriği bulunamadı');
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '📄 PDF İndir';
+                return;
+            }
+
+            const opt = {
+                margin: 0.5,
+                filename: `${cleanFileName}-rag-query-${date}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    backgroundColor: '#1c1c1c'
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    before: '.rag-section',
+                    after: '.similarity-score'
+                }
+            };
+
+            html2pdf()
+                .set(opt)
+                .from(pdfContainer)
+                .save()
+                .then(() => {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '📄 PDF İndir';
+                })
+                .catch((error) => {
+                    console.error('PDF indirme hatası:', error);
+                    alert('PDF indirme sırasında hata oluştu');
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '📄 PDF İndir';
+                });
+        };
+
+        // Model adını formatla
+        function getModelDisplayName(modelValue) {
+            const modelNames = {
+                "gpt-4o-mini-2024-07-18": "gpt-4o-mini",
+                "gpt-4.1-nano-2025-04-14": "gpt-4.1-nano",
+                "gpt-4.1-mini-2025-04-14": "gpt-4.1-mini"
+            };
+            return modelNames[modelValue] || modelValue;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+    </script>
+</body>
+</html>

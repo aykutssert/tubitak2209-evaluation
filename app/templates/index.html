@@ -126,145 +126,436 @@
             margin: 10px 0;
             width: 100%;
         }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #2c2c2c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #f0f0f0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a.active {
+            background-color: #4CAF50;
+        }
+
+        .nav-links a:hover {
+            background-color: #3a3a3a;
+        }
+
+        .nav-links a.active:hover {
+            background-color: #45a049;
+            /* Active hover için daha koyu yeşil */
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background-color: #ff6666;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff4444;
+        }
+
+        .settings-info {
+            background-color: #2c2c2c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #aaffaa;
+        }
+
+        .auth-loading {
+            display: none;
+            text-align: center;
+            color: #aaffaa;
+            padding: 20px;
+        }
+
+        .report-section,  .project-info {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.report-section h3{
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+.report-question + .report-answer {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+@media print {
+    .report-section {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+    }
+}
+
     </style>
 </head>
 
 <body>
-    <h1>📄 2209-A Project Evaluation</h1>
+    <div class="auth-loading" id="authLoading">
+        <p>🔄 Kullanıcı bilgileri yükleniyor...</p>
+    </div>
 
-    <form id="uploadForm">
-        <input type="file" id="fileInput" accept=".docx" required />
+    <div id="mainContent" style="display: none;">
+        <div class="navbar">
+            <div class="nav-links">
+                <a href="/" class="active">🏠 Home</a>
+                <a href="/settings">⚙️ Settings</a>
+                <a href="/projects">📋 Projects</a>
+                <a href="/rag-history" >🔍 RAG History</a>
+            </div>
+            <div class="user-info">
+                <span>👤 <span id="displayUsername">Username</span></span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
 
-        <!-- Mod Seçimi -->
-        <select id="modeSelect" name="mode" class="model-select">
-            <option value="evaluate">📊 Evaluation the project</option>
-            <option value="rag">💬 Ask questions about the project</option>
-        </select>
+        <div class="settings-info">
+            <strong>Current Settings:</strong> <span id="currentSettings">Loading...</span>
+        </div>
 
-        <!-- Soru Alanı -->
-        <textarea id="questionInput" rows="4" placeholder="Belgeye dayalı bir soru yazın..."
-            style="display: none;"></textarea>
+        <h1>📄 2209-A Project Evaluation</h1>
 
-        <!-- Engine Seçimi -->
-        <select id="engineSelect" name="engine" class="model-select">
-            <option value="api">🌐 API Model</option>
-            <option value="local">🔧 Local Model</option>
-        </select>
+        <form id="uploadForm">
+            <input type="file" id="fileInput" accept=".docx" required />
 
-        <!-- Model Seçimi -->
-        <select id="modelSelect" name="model" class="model-select">
-            <option value="gpt-4o-mini-2024-07-18">gpt-4o-mini</option>
-            <option value="gpt-4.1-nano-2025-04-14">gpt-4.1-nano</option>
-            <option value="gpt-4.1-mini-2025-04-14">gpt-4.1-mini</option>
-        </select>
+            <!-- Mod Seçimi -->
+            <select id="modeSelect" name="mode" class="model-select">
+                <option value="evaluate">📊 Evaluation the project</option>
+                <option value="rag">💬 Ask questions about the project</option>
+            </select>
 
-        <button type="submit" class="button2" id="uploadBtn">Upload</button>
+            <!-- Soru Alanı -->
+            <textarea id="questionInput" rows="4" placeholder="Belgeye dayalı bir soru yazın..."
+                style="display: none;"></textarea>
 
-        <p class="error" id="errorMessage" style="display: none;"></p>
-        <p id="loadingMessage" style="display: none;">⏳ Loading...</p>
-    </form>
+            <button type="submit" class="button2" id="uploadBtn">Upload</button>
 
-    <h2 id="resultTitle" style="display: none;">📝 Result:</h2>
-    <div id="totalScoreBox" class="total-score-box" style="display: none;"></div>
-    <button class="button2" id="downloadPdfBtn" style="display:none; margin-bottom: 20px;">📥 Download as PDF</button>
-    <div id="reportContainer" style="display: none;"></div>
+            <p class="error" id="errorMessage" style="display: none;"></p>
+            <p id="loadingMessage" style="display: none;">⏳ Loading...</p>
+        </form>
+
+        <h2 id="resultTitle" style="display: none;">📝 Result:</h2>
+        <div id="totalScoreBox" class="total-score-box" style="display: none;"></div>
+        <button class="button2" id="downloadPdfBtn" style="display:none; margin-bottom: 20px;">📥 Download as
+            PDF</button>
+        <div id="reportContainer" style="display: none;"></div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <script>
-        const modelOptions = {
-            local: [
-                { value: "gemma3:4b", label: "gemma3:4b" },
-                { value: "gemma3:12b", label: "gemma3:12b" }
-            ],
-            api: [
-                { value: "gpt-4o-mini-2024-07-18", label: "gpt-4o-mini" },
-                { value: "gpt-4.1-nano-2025-04-14", label: "gpt-4.1-nano" },
-                { value: "gpt-4.1-mini-2025-04-14", label: "gpt-4.1-mini" }
-            ]
+    document.getElementById("downloadPdfBtn").addEventListener("click", function () {
+    const fileName = document.getElementById("fileInput").files[0]?.name || "evaluation-report";
+    const cleanFileName = fileName.replace(/\.[^/.]+$/, ""); // uzantıyı kaldır
+    
+    const reportElement = document.getElementById("reportContainer");
+    const opt = {
+        margin: 0.5,
+        filename: `${cleanFileName}-evaluation-report.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true,
+            allowTaint: true,
+            scrollX: 0,
+            scrollY: 0
+        },
+        jsPDF: { 
+            unit: 'in', 
+            format: 'a4', 
+            orientation: 'portrait',
+            compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(reportElement).save();
+});
+
+
+
+    </script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+
+        // Firebase config - Kendi bilgilerinizle değiştirin
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXAXWkvj-IOrJ1HeMxQyJXFVgugPMEFGo",
+            authDomain: "chat-app-d6748.firebaseapp.com",
+            projectId: "chat-app-d6748",
+            storageBucket: "chat-app-d6748.firebasestorage.app",
+            messagingSenderId: "619605529593",
+            appId: "1:619605529593:android:8fa09008aee1ad0112e328" // Web app ID'nizi Firebase Console'dan alın
         };
 
-        document.getElementById("engineSelect").addEventListener("change", function () {
-            const selectedEngine = this.value;
-            const modelSelect = document.getElementById("modelSelect");
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-            modelSelect.innerHTML = "";
-            modelOptions[selectedEngine].forEach(option => {
-                const opt = document.createElement("option");
-                opt.value = option.value;
-                opt.textContent = option.label;
-                modelSelect.appendChild(opt);
-            });
+        let currentUser = null;
+
+        // Auth state listener
+        onAuthStateChanged(auth, async (user) => {
+
+            currentUser = user;
+            const authLoading = document.getElementById('authLoading');
+            const mainContent = document.getElementById('mainContent');
+
+            if (user) {
+
+                await user.reload();
+                // Kullanıcı giriş yapmış
+                authLoading.style.display = 'none';
+                mainContent.style.display = 'block';
+
+                const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+                document.getElementById('displayUsername').textContent = displayName;
+
+                // localStorage'a da kaydet
+                localStorage.setItem('username', displayName);
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('userId', user.uid);
+
+                displayCurrentSettings();
+
+            } else {
+                // Kullanıcı giriş yapmamış - login sayfasına yönlendir
+                window.location.href = '/login';
+            }
         });
+        // Kullanıcı bilgilerini global olarak erişilebilir yap
+
+        window.currentUser = function () {
+            return currentUser;
+        };
+        // Logout fonksiyonu
+        window.logout = async function () {
+            try {
+                await signOut(auth);
+                localStorage.clear();
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Çıkış yapılırken hata oluştu');
+            }
+        };
+
+        // Logout butonuna event listener ekle
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+    </script>
+
+    
+
+    <script>
+
+        document.getElementById('authLoading').style.display = 'block';
+
+
+        function displayCurrentSettings() {
+            const model = localStorage.getItem("defaultModel") || "gpt-4o-mini-2024-07-18";
+            const modelText = getModelDisplayName(model);
+
+            document.getElementById("currentSettings").textContent = `🌐 API Model - ${modelText}`;
+        }
+        function getModelDisplayName(modelValue) {
+            const modelNames = {
+                "gpt-4o-mini-2024-07-18": "gpt-4o-mini",
+                "gpt-4.1-nano-2025-04-14": "gpt-4.1-nano",
+                "gpt-4.1-mini-2025-04-14": "gpt-4.1-mini"
+            };
+            return modelNames[modelValue] || modelValue;
+        }
 
         document.getElementById("modeSelect").addEventListener("change", function () {
             const questionInput = document.getElementById("questionInput");
             questionInput.style.display = this.value === "rag" ? "block" : "none";
         });
 
-        document.getElementById("uploadForm").addEventListener("submit", function (e) {
+        document.getElementById("uploadForm").addEventListener("submit", async function (e) {
             e.preventDefault();
 
             const uploadBtn = document.getElementById("uploadBtn");
             uploadBtn.disabled = true;
             uploadBtn.textContent = "⏳ Loading...";
 
-            const fileInput = document.getElementById("fileInput");
-            const file = fileInput.files[0];
-            const mode = document.getElementById("modeSelect").value;
-            const question = document.getElementById("questionInput").value.trim();
-
-            if (!file || !file.name.endsWith(".docx")) {
-                showError("Sadece .docx dosyaları yüklenebilir.");
+            // Firebase kullanıcısını kontrol et
+            const user = window.currentUser ? window.currentUser() : null;
+            if (!user) {
+                showError("Kullanıcı girişi gerekli. Lütfen tekrar giriş yapın.");
+                resetButton();
                 return;
             }
 
-            if (mode === "rag" && question === "") {
-                showError("Soru alanı boş bırakılamaz.");
-                return;
-            }
+            try {
+                // Firebase ID token al
+                const idToken = await user.getIdToken();
 
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("mode", mode);
-            formData.append("question", question);
-            formData.append("engine", document.getElementById("engineSelect").value);
-            formData.append("model", document.getElementById("modelSelect").value);
+                const fileInput = document.getElementById("fileInput");
+                const file = fileInput.files[0];
+                const mode = document.getElementById("modeSelect").value;
+                const question = document.getElementById("questionInput").value.trim();
 
-            document.getElementById("errorMessage").style.display = "none";
-            // document.getElementById("loadingMessage").style.display = "block";
-            document.getElementById("reportContainer").style.display = "none";
-            document.getElementById("totalScoreBox").style.display = "none";
-            document.getElementById("downloadPdfBtn").style.display = "none";
+                // Dosya kontrolü
+                if (!file || !file.name.endsWith(".docx")) {
+                    showError("Sadece .docx dosyaları yüklenebilir.");
+                    resetButton();
+                    return;
+                }
 
-            const route = mode === "rag" ? "/ask" : "/upload";
-            fetch(route, {
-                method: "POST",
-                body: formData,
-            })
-                .then(res => res.json())
-                .then(data => {
-                    uploadBtn.disabled = false;
-                    uploadBtn.textContent = "Upload";
-                    // document.getElementById("loadingMessage").style.display = "none";
+                // RAG modu için soru kontrolü
+                if (mode === "rag" && question === "") {
+                    showError("Soru alanı boş bırakılamaz.");
+                    resetButton();
+                    return;
+                }
 
-                    if (data.error) {
-                        showError(data.error);
-                        return;
+                // Model ayarını al
+                const model = localStorage.getItem("defaultModel") || "gpt-4o-mini-2024-07-18";
+
+                // FormData oluştur
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("mode", mode);
+                formData.append("question", question);
+                formData.append("engine", "api");
+                formData.append("model", model);
+
+                // UI'yi temizle
+                document.getElementById("errorMessage").style.display = "none";
+                document.getElementById("reportContainer").style.display = "none";
+                document.getElementById("totalScoreBox").style.display = "none";
+                document.getElementById("downloadPdfBtn").style.display = "none";
+
+                // API çağrısı yap
+                const route = mode === "rag" ? "/ask" : "/upload";
+                const response = await fetch(route, {
+                    method: "POST",
+                    headers: {
+                        'Authorization': `Bearer ${idToken}` // Güvenli token gönderimi
+                    },
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Hata kontrolü
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                // RAG modunun sonuçlarını göster
+                // RAG modunun sonuçlarını göster - GÜNCELLENMIŞ
+                if (mode === "rag") {
+                    document.getElementById("resultTitle").style.display = "block";
+                    document.getElementById("reportContainer").style.display = "grid";
+                    document.getElementById("reportContainer").innerHTML = "";
+
+                    const sectionDiv = document.createElement("div");
+                    sectionDiv.className = "report-section";
+
+                    const title = document.createElement("h3");
+                    title.textContent = "💬 Soru-Cevap Sonucu";
+                    sectionDiv.appendChild(title);
+
+                    // RAG özel bilgileri
+                    if (data.best_section && data.best_section !== 'N/A') {
+                        const sectionInfo = document.createElement("div");
+                        sectionInfo.style.cssText = "margin-bottom: 15px; padding: 10px; background-color: #3a3a3a; border-radius: 5px;";
+                        sectionInfo.innerHTML = `
+                <strong>🎯 En İlgili Bölüm:</strong> ${data.best_section}<br>
+                <strong>📊 Benzerlik Oranı:</strong> ${data.similarity ? (data.similarity * 100).toFixed(1) + '%' : 'N/A'}<br>
+                <strong>🔍 Bulunan Bölüm Sayısı:</strong> ${data.matched_sections || 1}
+            `;
+                        sectionDiv.appendChild(sectionInfo);
                     }
 
-                    if (mode === "rag") {
-                        document.getElementById("resultTitle").style.display = "block";
-                        document.getElementById("reportContainer").style.display = "grid";
-                        document.getElementById("reportContainer").innerHTML = "";
+                    const qEl = document.createElement("div");
+                    qEl.className = "report-question";
+                    qEl.innerHTML = `<strong>Soru:</strong>${question}`;
+                    sectionDiv.appendChild(qEl);
 
-                        const sectionDiv = document.createElement("div");
-                        sectionDiv.className = "report-section";
+                    const aEl = document.createElement("div");
+                    aEl.className = "report-answer";
+                    aEl.innerHTML = `<strong>Cevap:</strong><br>${data.answer}`;
+                    sectionDiv.appendChild(aEl);
 
-                        const title = document.createElement("h3");
-                        title.textContent = "Soru-Cevap Sonucu";
-                        sectionDiv.appendChild(title);
+                    document.getElementById("reportContainer").appendChild(sectionDiv);
+                    return;
+                }
 
+                // Evaluation modunun sonuçlarını göster
+                document.getElementById("resultTitle").style.display = "block";
+                document.getElementById("reportContainer").style.display = "grid";
+                document.getElementById("reportContainer").innerHTML = "";
+                document.getElementById("downloadPdfBtn").style.display = "inline-block";
+
+                const answers = data.answers || {};
+                const scores = data.section_scores || {};
+
+                let totalScore = 0;
+                let totalMaxScore = 0;
+
+                // Her section için sonuçları oluştur
+                for (const section in answers) {
+                    const sectionDiv = document.createElement("div");
+                    sectionDiv.className = "report-section";
+                    const questionSet = answers[section];
+                    const questionCount = Object.keys(questionSet).length;
+                    const maxScore = questionCount * 5;
+                    const sectionScore = scores[section] || 0;
+
+                    totalScore += sectionScore;
+                    totalMaxScore += maxScore;
+
+                    const title = document.createElement("h3");
+                    title.textContent = `${section} (${maxScore} Puan)`;
+                    sectionDiv.appendChild(title);
+
+                    for (const question in questionSet) {
                         const qEl = document.createElement("div");
                         qEl.className = "report-question";
                         qEl.textContent = question;
@@ -272,70 +563,36 @@
 
                         const aEl = document.createElement("div");
                         aEl.className = "report-answer";
-                        aEl.textContent = data.answer;
+                        aEl.textContent = questionSet[question];
                         sectionDiv.appendChild(aEl);
-
-                        document.getElementById("reportContainer").appendChild(sectionDiv);
-                        return;
                     }
 
+                    const scoreEl = document.createElement("div");
+                    scoreEl.className = "section-score";
+                    scoreEl.textContent = `Puan: ${sectionScore}`;
+                    sectionDiv.appendChild(scoreEl);
 
-                    document.getElementById("resultTitle").style.display = "block";
-                    document.getElementById("reportContainer").style.display = "grid";
-                    document.getElementById("reportContainer").innerHTML = "";
-                    document.getElementById("downloadPdfBtn").style.display = "inline-block";
+                    document.getElementById("reportContainer").appendChild(sectionDiv);
+                }
 
-                    const answers = data.answers || {};
-                    const scores = data.section_scores || {};
+                // Toplam puanı göster
+                const totalScoreBox = document.getElementById("totalScoreBox");
+                totalScoreBox.textContent = `Total Points: ${totalScore} / ${totalMaxScore}`;
+                totalScoreBox.style.display = "block";
 
-                    let totalScore = 0;
-                    let totalMaxScore = 0;
+                
 
-                    for (const section in answers) {
-                        const sectionDiv = document.createElement("div");
-                        sectionDiv.className = "report-section";
-                        const questionSet = answers[section];
-                        const questionCount = Object.keys(questionSet).length;
-                        const maxScore = questionCount * 5;
-                        const sectionScore = scores[section] || 0;
+            } catch (error) {
+                console.error('Upload error:', error);
+                showError("⚠️ Sunucu hatası: " + error.message);
+            } finally {
+                resetButton();
+            }
 
-                        totalScore += sectionScore;
-                        totalMaxScore += maxScore;
-
-                        const title = document.createElement("h3");
-                        title.textContent = `${section} (${maxScore} Puan)`;
-                        sectionDiv.appendChild(title);
-
-                        for (const question in questionSet) {
-                            const qEl = document.createElement("div");
-                            qEl.className = "report-question";
-                            qEl.textContent = question;
-                            sectionDiv.appendChild(qEl);
-
-                            const aEl = document.createElement("div");
-                            aEl.className = "report-answer";
-                            aEl.textContent = questionSet[question];
-                            sectionDiv.appendChild(aEl);
-                        }
-
-                        const scoreEl = document.createElement("div");
-                        scoreEl.className = "section-score";
-                        scoreEl.textContent = `Puan: ${sectionScore}`;
-                        sectionDiv.appendChild(scoreEl);
-
-                        document.getElementById("reportContainer").appendChild(sectionDiv);
-                    }
-
-                    const totalScoreBox = document.getElementById("totalScoreBox");
-                    totalScoreBox.textContent = `Total Points: ${totalScore} / ${totalMaxScore}`;
-                    totalScoreBox.style.display = "block";
-                })
-                .catch(err => {
-                    showError("⚠️ Sunucu hatası: " + err.message);
-                    uploadBtn.disabled = false;
-                    uploadBtn.textContent = "Upload";
-                    document.getElementById("loadingMessage").style.display = "none";
-                });
+            function resetButton() {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = "Upload";
+            }
         });
 
         function showError(message) {
@@ -343,7 +600,7 @@
             errorEl.textContent = message;
             errorEl.style.display = "block";
             document.getElementById("uploadBtn").disabled = false;
-            document.getElementById("uploadBtn").textContent = "Gönder";
+            document.getElementById("uploadBtn").textContent = "Upload";
         }
     </script>
 </body>

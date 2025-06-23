@@ -2,3 +2,5 @@
 __pycache__/
 uploads/
 *.pyc
+
+app/firebase-service.json

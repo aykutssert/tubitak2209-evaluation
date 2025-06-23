@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Projects - 2209-A Project</title>
+    <style>
+        body {
+            background-color: #1c1c1c;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 90%;
+            margin: auto;
+        }
+
+        h1,
+        h2 {
+            color: #ffffff;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: #2c2c2c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #f0f0f0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #3a3a3a;
+        }
+
+        .nav-links a.active {
+            background-color: #4CAF50;
+        }
+
+        .nav-links a.active:hover {
+            background-color: #45a049;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background-color: #ff6666;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff4444;
+        }
+
+        .auth-loading {
+            display: none;
+            text-align: center;
+            color: #aaffaa;
+            padding: 20px;
+        }
+
+        /* Projects Container */
+        .projects-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            height: 80vh;
+        }
+
+        .projects-list {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .projects-list h3 {
+            color: #aaffaa;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .project-item {
+            background-color: #3a3a3a;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .project-item:hover {
+            background-color: #4a4a4a;
+        }
+
+        .project-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .project-item .project-title {
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .project-item .project-date {
+            font-size: 11px;
+            color: #aaffaa;
+            margin-bottom: 3px;
+        }
+
+        .project-item .project-mode {
+            font-size: 12px;
+            color: #dddddd;
+        }
+
+        .project-item.selected .project-date,
+        .project-item.selected .project-mode {
+            color: #ffffff;
+        }
+
+        .project-detail {
+            background-color: #2c2c2c;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .project-detail h3 {
+            color: #aaffaa;
+            margin-top: 0;
+        }
+
+        .no-project-selected {
+            text-align: center;
+            color: #aaffaa;
+            padding: 50px;
+        }
+
+        .report-section {
+            background-color: #3a3a3a;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4CAF50;
+            border-radius: 8px;
+        }
+
+        .report-section h3 {
+            color: #aaffaa;
+            margin-top: 0;
+        }
+
+        .report-question {
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .report-answer {
+            background-color: #2c2c2c;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-line;
+            color: #dddddd;
+            margin-bottom: 10px;
+        }
+
+        .section-score {
+            font-style: italic;
+            color: #bbbbbb;
+            margin-top: 10px;
+        }
+
+        .total-score-box {
+            background-color: #4CAF50;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+        }
+
+        .project-info {
+            background-color: #3a3a3a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .project-info div {
+            margin-bottom: 8px;
+            color: #aaffaa;
+        }
+
+        /* Project Header with Download Button */
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #3a3a3a;
+            border-radius: 8px;
+        }
+
+        .project-header h3 {
+            margin: 0;
+            color: #aaffaa;
+        }
+
+        .download-btn {
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .download-btn:disabled {
+            background-color: #666666;
+            cursor: not-allowed;
+        }
+
+        .loading-message {
+            text-align: center;
+            color: #aaffaa;
+            padding: 20px;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #ff6666;
+            padding: 20px;
+        }
+
+        /* PDF specific styles */
+        .report-section, .project-info {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .report-section h3 {
+            page-break-after: avoid;
+            break-after: avoid;
+        }
+
+        .report-question + .report-answer {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        @media print {
+            .report-section {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            
+            .project-header .download-btn {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .projects-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .projects-list {
+                max-height: 300px;
+            }
+
+            .project-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .download-btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-loading" id="authLoading">
+        <p>🔄 Kullanıcı bilgileri yükleniyor...</p>
+    </div>
+
+    <div id="mainContent" style="display: none;">
+        <div class="navbar">
+            <div class="nav-links">
+                <a href="/">🏠 Home</a>
+                <a href="/settings">⚙️ Settings</a>
+                <a href="/projects" class="active">📋 Projects</a>
+                <a href="/rag-history">🔍 RAG History</a>
+            </div>
+            <div class="user-info">
+                <span>👤 <span id="displayUsername">Username</span></span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <h1>📋 Geçmiş Projeler</h1>
+
+        <div class="projects-container">
+            <div class="projects-list">
+                <h3>Proje Listesi</h3>
+                <div id="projectsList">
+                    <div class="loading-message">📄 Projeler yükleniyor...</div>
+                </div>
+            </div>
+
+            <div class="project-detail">
+                <div id="projectDetail" class="no-project-selected">
+                    <h3>Proje Detayları</h3>
+                    <p>Detaylarını görmek için bir proje seçin.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, collection, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXAXWkvj-IOrJ1HeMxQyJXFVgugPMEFGo",
+            authDomain: "chat-app-d6748.firebaseapp.com",
+            projectId: "chat-app-d6748",
+            storageBucket: "chat-app-d6748.firebasestorage.app",
+            messagingSenderId: "619605529593",
+            appId: "1:619605529593:android:8fa09008aee1ad0112e328"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let selectedProject = null;
+        let selectedProjectId = null;
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            const authLoading = document.getElementById('authLoading');
+            const mainContent = document.getElementById('mainContent');
+
+            if (user) {
+                authLoading.style.display = 'none';
+                mainContent.style.display = 'block';
+
+                const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+                document.getElementById('displayUsername').textContent = displayName;
+
+                // Projeleri yükle
+                loadProjectsList();
+
+            } else {
+                window.location.href = '/login';
+            }
+        });
+
+        // Logout fonksiyonu
+        window.logout = async function () {
+            try {
+                await signOut(auth);
+                localStorage.clear();
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Çıkış yapılırken hata oluştu');
+            }
+        };
+
+        // Projeler listesini yükle
+        async function loadProjectsList() {
+            try {
+                if (!currentUser) return;
+
+                const projectsRef = collection(db, 'users', currentUser.uid, 'projects');
+                const q = query(projectsRef, orderBy('createdAt', 'desc'), limit(100));
+                const querySnapshot = await getDocs(q);
+
+                const projectsList = document.getElementById('projectsList');
+                projectsList.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    projectsList.innerHTML = '<div class="loading-message">📄 Henüz proje bulunmuyor.</div>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const project = doc.data();
+                    const projectItem = createProjectListItem(project, doc.id);
+                    projectsList.appendChild(projectItem);
+                });
+
+            } catch (error) {
+                console.error('Proje listesi yüklenirken hata:', error);
+                document.getElementById('projectsList').innerHTML = '<div class="error-message">❌ Proje listesi yüklenemedi.</div>';
+            }
+        }
+
+        // Proje liste öğesi oluştur
+        function createProjectListItem(project, projectId) {
+            const div = document.createElement('div');
+            div.className = 'project-item';
+            div.onclick = () => selectProject(project, projectId, div);
+
+            const date = project.createdAt ? new Date(project.createdAt.toDate()).toLocaleString('tr-TR') : 'Bilinmiyor';
+            const mode = project.mode === 'evaluate' ? '📊 Evaluation' : '💬 Question';
+
+            div.innerHTML = `
+                <div class="project-title">📄 ${project.fileName}</div>
+                <div class="project-date">📅 ${date}</div>
+                <div class="project-mode">${mode}</div>
+            `;
+
+            return div;
+        }
+
+        // Proje seç ve detayını göster
+        function selectProject(project, projectId, itemElement) {
+            // Önceki seçimi kaldır
+            document.querySelectorAll('.project-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Yeni seçimi işaretle
+            itemElement.classList.add('selected');
+
+            // Geçerli proje bilgilerini sakla
+            selectedProject = project;
+            selectedProjectId = projectId;
+
+            // Proje detayını göster
+            const projectDetail = document.getElementById('projectDetail');
+            projectDetail.innerHTML = '';
+            projectDetail.className = '';
+
+            if (project.mode === 'evaluate') {
+                showEvaluationProject(project, projectDetail);
+            } 
+        }
+
+        // Evaluation projesi detayını göster
+        function showEvaluationProject(project, container) {
+            const date = project.createdAt ? new Date(project.createdAt.toDate()).toLocaleString('tr-TR') : 'Bilinmiyor';
+
+            // Proje header'ı (başlık ve indirme butonu)
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'project-header';
+            headerDiv.innerHTML = `
+                <h3>📊 Evaluation Raporu</h3>
+                <button class="download-btn" onclick="downloadProjectPDF()">
+                    📄 PDF İndir
+                </button>
+            `;
+            container.appendChild(headerDiv);
+
+            // PDF için ana container
+            const pdfContainer = document.createElement('div');
+            pdfContainer.id = 'pdfContainer';
+            container.appendChild(pdfContainer);
+
+            // Proje bilgileri
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'project-info';
+            infoDiv.innerHTML = `
+                <div><strong>📄 Dosya:</strong> ${project.fileName}</div>
+                <div><strong>📅 Tarih:</strong> ${date}</div>
+                <div><strong>🤖 Model:</strong> ${getModelDisplayName(project.model)}</div>
+            `;
+            pdfContainer.appendChild(infoDiv);
+
+            // Toplam puan
+            if (project.totalScore !== undefined) {
+                const scoreBox = document.createElement('div');
+                scoreBox.className = 'total-score-box';
+                scoreBox.textContent = `Toplam Puan: ${project.totalScore} / ${project.totalMaxScore}`;
+                pdfContainer.appendChild(scoreBox);
+            }
+
+            // Bölüm sonuçları
+            const answers = project.answers || {};
+            const scores = project.scores || {};
+
+            for (const section in answers) {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'report-section';
+                const questionSet = answers[section];
+                const questionCount = Object.keys(questionSet).length;
+                const maxScore = questionCount * 5;
+                const sectionScore = scores[section] || 0;
+
+                const title = document.createElement('h3');
+                title.textContent = `${section} (${sectionScore}/${maxScore} Puan)`;
+                sectionDiv.appendChild(title);
+
+                for (const question in questionSet) {
+                    const qEl = document.createElement('div');
+                    qEl.className = 'report-question';
+                    qEl.textContent = question;
+                    sectionDiv.appendChild(qEl);
+
+                    const aEl = document.createElement('div');
+                    aEl.className = 'report-answer';
+                    aEl.textContent = questionSet[question];
+                    sectionDiv.appendChild(aEl);
+                }
+
+                pdfContainer.appendChild(sectionDiv);
+            }
+        }
+
+        // PDF İndirme fonksiyonu
+        window.downloadProjectPDF = function() {
+            if (!selectedProject) {
+                alert('Lütfen bir proje seçin');
+                return;
+            }
+
+            const downloadBtn = document.querySelector('.download-btn');
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '⏳ İndiriliyor...';
+
+            const fileName = selectedProject.fileName || 'evaluation-report';
+            const cleanFileName = fileName.replace(/\.[^/.]+$/, "");
+            
+            const pdfContainer = document.getElementById('pdfContainer');
+            
+            if (!pdfContainer) {
+                alert('PDF içeriği bulunamadı');
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '📄 PDF İndir';
+                return;
+            }
+
+            const opt = {
+                margin: 0.5,
+                filename: `${cleanFileName}-evaluation-report.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    backgroundColor: '#1c1c1c'
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { 
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    before: '.report-section',
+                    after: '.total-score-box'
+                }
+            };
+
+            html2pdf()
+                .set(opt)
+                .from(pdfContainer)
+                .save()
+                .then(() => {
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '📄 PDF İndir';
+                })
+                .catch((error) => {
+                    console.error('PDF indirme hatası:', error);
+                    alert('PDF indirme sırasında hata oluştu');
+                    downloadBtn.disabled = false;
+                    downloadBtn.innerHTML = '📄 PDF İndir';
+                });
+        };
+
+        // Model adını formatla
+        function getModelDisplayName(modelValue) {
+            const modelNames = {
+                "gpt-4o-mini-2024-07-18": "gpt-4o-mini",
+                "gpt-4.1-nano-2025-04-14": "gpt-4.1-nano",
+                "gpt-4.1-mini-2025-04-14": "gpt-4.1-mini"
+            };
+            return modelNames[modelValue] || modelValue;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+    </script>
+</body>
+
+</html>

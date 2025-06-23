@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Ayarlar - 2209-A Project</title>
+    <style>
+        body {
+            background-color: #1c1c1c;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 90%;
+            margin: auto;
+        }
+
+        h1, h2 {
+            color: #ffffff;
+        }
+
+        .navbar {
+            background-color: #2c2c2c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #f0f0f0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-links a.active {
+            background-color: #4CAF50;
+        }
+
+        .nav-links a:hover {
+            background-color: #3a3a3a;
+        }
+        .nav-links a.active:hover {
+    background-color: #45a049; /* Active hover için daha koyu yeşil */
+}
+
+        .settings-container {
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .settings-section h3 {
+            color: #aaffaa;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .model-select, input[type="text"], input[type="email"], input[type="password"] {
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .button2 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .button2:hover {
+            background-color: #45a049;
+        }
+
+        .success-message {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background-color: #ff6666;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff4444;
+        }
+
+        .info-box {
+            background-color: #3a3a3a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .info-box h4 {
+            color: #aaffaa;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+            <div class="nav-links">
+                <a href="/">🏠 Home</a>
+                <a href="/settings" class="active">⚙️ Settings</a>
+                <a href="/projects">📋 Projects</a>
+                <a href="/rag-history" >🔍 RAG History</a>
+            </div>
+            <div class="user-info">
+                <span>👤 <span id="displayUsername"></span></span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+    <div class="settings-container">
+        <div class="success-message" id="successMessage">
+            ✅ Settings saved successfully!
+        </div>
+
+        <!-- Model Ayarları -->
+        <div class="settings-section">
+            <h3>🤖 Model Ayarları</h3>
+            
+            <div class="form-group">
+                <label for="defaultModel">Varsayılan Model</label>
+                <select id="defaultModel" class="model-select">
+                    <option value="gpt-4o-mini-2024-07-18">gpt-4o-mini</option>
+                    <option value="gpt-4.1-nano-2025-04-14">gpt-4.1-nano</option>
+                    <option value="gpt-4.1-mini-2025-04-14">gpt-4.1-mini</option>
+                </select>
+
+            
+            </div>
+            <button class="button2" onclick="saveSettings()">Save</button>
+        </div>
+
+
+        <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+
+        // Firebase config - Kendi bilgilerinizle değiştirin
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXAXWkvj-IOrJ1HeMxQyJXFVgugPMEFGo",
+            authDomain: "chat-app-d6748.firebaseapp.com",
+            projectId: "chat-app-d6748",
+            storageBucket: "chat-app-d6748.firebasestorage.app",
+            messagingSenderId: "619605529593",
+            appId: "1:619605529593:android:8fa09008aee1ad0112e328" // Web app ID'nizi Firebase Console'dan alın
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+
+            currentUser = user;
+
+            if (user) {
+
+                const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+                document.getElementById('displayUsername').textContent = displayName;
+
+            } else {
+                // Kullanıcı giriş yapmamış - login sayfasına yönlendir
+                window.location.href = '/login';
+            }
+        });
+        // Kullanıcı bilgilerini global olarak erişilebilir yap
+
+        window.currentUser = function () {
+            return currentUser;
+        };
+        // Logout fonksiyonu
+        window.logout = async function () {
+            try {
+                await signOut(auth);
+                localStorage.clear();
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Çıkış yapılırken hata oluştu');
+            }
+        };
+
+        // Logout butonuna event listener ekle
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+    </script>
+
+ 
+    <script>
+        // Sayfa yüklendiğinde kaydedilmiş ayarları yükle
+        window.onload = function() {
+            const savedModel = localStorage.getItem("defaultModel") || "gpt-4o-mini-2024-07-18";
+
+            
+            document.getElementById("defaultModel").value = savedModel;
+
+
+        };
+
+        function saveSettings() {
+            // Ayarları localStorage'a kaydet
+            localStorage.setItem("defaultModel", document.getElementById("defaultModel").value);
+
+               
+            // Başarı mesajını göster
+            const successMsg = document.getElementById("successMessage");
+            successMsg.style.display = "block";
+            
+            // 3 saniye sonra mesajı gizle
+            setTimeout(() => {
+                successMsg.style.display = "none";
+            }, 3000);
+
+        }
+    </script>
+</body>
+</html>

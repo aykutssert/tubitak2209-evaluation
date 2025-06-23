@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login - 2209-A Project</title>
+    <style>
+        body {
+            background-color: #1c1c1c;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 90%;
+            margin: auto;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background-color: #2c2c2c;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+      
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        input[type="text"], input[type="password"], input[type="email"] {
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .button2 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .button2:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: #ff6666;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .register-link a {
+            color: #aaffaa;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+       .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .forgot-password a {
+            color: #aaffaa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #aaffaa;
+            margin-bottom: 15px;
+        }
+        
+    </style>
+</head>
+<body>
+
+
+
+        
+    <div class="login-container">  
+        
+        <div class="loading" id="loadingMessage">
+                🔄 Loading...
+            </div>
+
+        <form id="loginForm">
+            <div class="error" id="errorMessage" style="display: none;"></div>
+            <div class="success" id="successMessage" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="emailOrUsername">Email</label>
+                <input type="text" id="emailOrUsername" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <button type="submit" class="button2" id="loginBtn">Login</button>
+        </form>
+        <div class="forgot-password">
+                <a href="#" onclick="resetPassword()">Forgot Password?</a>
+            </div>
+
+        <div class="register-link">
+            Don't have an account? <a href="/register">Register</a>
+        </div>
+    </div>
+   
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        // Firebase config - Gerçek Web App ID'nizi buraya yazın
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXAXWkvj-IOrJ1HeMxQyJXFVgugPMEFGo",
+            authDomain: "chat-app-d6748.firebaseapp.com",
+            projectId: "chat-app-d6748",
+            storageBucket: "chat-app-d6748.firebasestorage.app",
+            messagingSenderId: "619605529593",
+            appId: "1:619605529593:android:8fa09008aee1ad0112e328" // Bunu değiştirin
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Zaten giriş yapmış kullanıcıyı kontrol et
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Kullanıcı zaten giriş yapmış, ana sayfaya yönlendir
+                window.location.href = '/';
+            }
+        });
+
+        // Login form submit
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const emailOrUsername = document.getElementById('emailOrUsername').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loadingMsg = document.getElementById('loadingMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            const successMsg = document.getElementById('successMessage');
+            
+            // Email mi username mi kontrol et
+            const isEmail = emailOrUsername.includes('@');
+            let email = emailOrUsername;
+            
+            // Eğer username ise, email'e çevir (Firestore'dan al)
+            if (!isEmail) {
+              
+                    
+                    const usersRef = collection(db, 'users');
+                    const q = query(usersRef, where('displayName', '==', emailOrUsername));
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (querySnapshot.empty) {
+                        showError('Bu kullanıcı adı bulunamadı.');
+                        return;
+                    }
+                    
+                    // İlk eşleşen kullanıcının email'ini al
+                    querySnapshot.forEach((doc) => {
+                        email = doc.data().email;
+                    });
+                    
+               
+            }
+
+            // UI güncelleme
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Giriş yapılıyor...';
+            loadingMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            try {
+                // Firebase Authentication ile giriş yap
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Başarılı giriş
+                showSuccess('Giriş başarılı! Yönlendiriliyorsunuz...');
+                
+                // Ana sayfaya yönlendir
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+                
+            } catch (error) {
+                // Hata durumları
+                let errorMessage = 'Giriş yapılırken bir hata oluştu.';
+                
+                switch (error.code) {
+                    case 'auth/invalid-login-credentials':
+                        errorMessage = 'Geçersiz giriş bilgileri. Lütfen e-posta ve şifrenizi kontrol edin.';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Şifre hatalı.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Geçersiz e-posta adresi.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'Bu hesap devre dışı bırakılmış.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin.';
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMessage = 'E-posta veya şifre hatalı.';
+                        break;
+                    default:
+                        errorMessage = `Hata: ${error.message}`;
+                }
+                
+                showError(errorMessage);
+                
+            } finally {
+                // UI'yi eski haline getir
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Giriş Yap';
+                loadingMsg.style.display = 'none';
+            }
+        });
+
+        // Şifre sıfırlama
+        window.resetPassword = async function() {
+            const email = document.getElementById('emailOrUsername').value.trim();
+            
+            if (!email) {
+                showError('Şifre sıfırlama için lütfen önce e-posta adresinizi girin.');
+                return;
+            }
+            
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showSuccess('Şifre sıfırlama e-postası gönderildi. E-posta kutunuzu kontrol edin.');
+            } catch (error) {
+                let errorMessage = 'Şifre sıfırlama e-postası gönderilemedi.';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Geçersiz e-posta adresi.';
+                        break;
+                    default:
+                        errorMessage = `Hata: ${error.message}`;
+                }
+                
+                showError(errorMessage);
+            }
+        };
+
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            successEl.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            errorEl.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

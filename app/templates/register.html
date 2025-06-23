@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register - 2209-A Project</title>
+    <style>
+        body {
+            background-color: #1c1c1c;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 90%;
+            margin: auto;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-container {
+            background-color: #2c2c2c;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+       
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"] {
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .button2 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .button2:hover {
+            background-color: #45a049;
+        }
+
+        .button2:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
+        .error {
+            color: #ff6666;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #aaffaa;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #aaffaa;
+        }
+
+        .password-requirements {
+            font-size: 12px;
+            color: #aaffaa;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+       
+    </style>
+</head>
+<body>
+
+
+       
+    <div class="register-container">
+        <div class="loading" id="loadingMessage">
+            🔄 Creating account...
+        </div>
+        
+        <form id="registerForm">
+            <div class="error" id="errorMessage" style="display: none;"></div>
+            <div class="success" id="successMessage" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="displayName">Full Name</label>
+                <input type="text" id="displayName" required placeholder="Your full name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required placeholder="yourname@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="At least 6 characters">
+                <div class="password-requirements">
+                    Your password must be at least 6 characters long.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required placeholder="Re-enter your password">
+            </div>
+
+            <button type="submit" class="button2" id="registerBtn">Create Account</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="/login">Login</a>
+        </div>
+    </div>
+      
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXAXWkvj-IOrJ1HeMxQyJXFVgugPMEFGo",
+            authDomain: "chat-app-d6748.firebaseapp.com",
+            projectId: "chat-app-d6748",
+            storageBucket: "chat-app-d6748.firebasestorage.app",
+            messagingSenderId: "619605529593",
+            appId: "1:619605529593:android:8fa09008aee1ad0112e328"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Zaten giriş yapmış kullanıcıyı kontrol et
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Kullanıcı zaten giriş yapmış, ana sayfaya yönlendir
+                window.location.href = '/';
+            }
+        });
+
+        // Register form submit
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const displayName = document.getElementById('displayName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const registerBtn = document.getElementById('registerBtn');
+            const loadingMsg = document.getElementById('loadingMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            // Basit doğrulamalar
+            if (password !== confirmPassword) {
+                showError('Şifreler eşleşmiyor.');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('Şifre en az 6 karakter olmalıdır.');
+                return;
+            }
+            
+            if (!displayName) {
+                showError('Ad soyad alanı boş bırakılamaz.');
+                return;
+            }
+            
+            // UI güncelleme
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Hesap oluşturuluyor...';
+            loadingMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            
+            try {
+                // Firebase Authentication ile kullanıcı oluştur
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Kullanıcının display name'ini güncelle
+                await updateProfile(user, {
+                    displayName: displayName
+                });
+                
+                // Firestore'da kullanıcı belgesi oluştur
+                await setDoc(doc(db, 'users', user.uid), {
+                    displayName: displayName,
+                    email: email,
+                    uid: user.uid,
+                    defaultModel: 'gpt-4o-mini-2024-07-18',
+                    createdAt: serverTimestamp(),
+                    lastLoginAt: serverTimestamp()
+                });
+                
+                // Başarılı kayıt
+                showSuccess('Hesap başarıyla oluşturuldu! Giriş sayfasına yönlendiriliyorsunuz...');
+                
+                // Login sayfasına yönlendir
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                
+            } catch (error) {
+                // Hata durumları
+                let errorMessage = 'Hesap oluşturulurken bir hata oluştu.';
+                
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'Bu e-posta adresi zaten kullanımda.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Geçersiz e-posta adresi.';
+                        break;
+                    case 'auth/operation-not-allowed':
+                        errorMessage = 'E-posta/şifre hesapları etkinleştirilmemiş.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'Şifre çok zayıf. Daha güçlü bir şifre seçin.';
+                        break;
+
+                    default:
+                        errorMessage = 'Beklenmeyen bir hata oluştu: ' + error.message;
+                        break;
+                }
+                showError(errorMessage);
+            } finally {
+                // UI güncelleme
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Kayıt Ol';
+                loadingMsg.style.display = 'none';
+            }
+        });
+        // Hata mesajını göster
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMessage');
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+        }
+        // Başarı mesajını göster
+        function showSuccess(message) {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+        }
+        // Sayfa yüklendiğinde loading mesajını gizle
+        window.onload = function() {
+            const loadingMsg = document.getElementById('loadingMessage');
+            loadingMsg.style.display = 'none';
+        };
+    </script>
+</body>
+</html>
