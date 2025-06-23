@@ -13,7 +13,7 @@ load_dotenv()
 class TurkishRAGSystem:
     def __init__(self):
         # Türkçe için optimize edilmiş model
-        self.model = SentenceTransformer("emrecan/bert-base-turkish-cased-mean-nli-stsb-tr")
+        self.model=None
         self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
         
         # Başlık öncelik mapping'i
@@ -29,9 +29,18 @@ class TurkishRAGSystem:
             "bütçe": 2,
             "etki": 1
         }
+    def load_model(self):
+        if self.model is None:
+            try:
+                # Türkçe için optimize edilmiş model
+                self.model = SentenceTransformer("emrecan/bert-base-turkish-cased-mean-nli-stsb-tr")
+            except Exception as e:
+                print(f"Model yükleme hatası: {e}")
+                raise RuntimeError("Model yüklenemedi. Lütfen modeli kontrol edin.")
 
     def embed_sections_with_local_model(self, data: Dict) -> List[Dict]:
         """2209-A proje yapısındaki section'ları vektörleştir - enhanced version"""
+        self.load_model()
         chunks = []
         
         # Ana section'ları işle
