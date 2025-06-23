@@ -1,0 +1,6 @@
+.env
+__pycache__/
+uploads/
+*.pyc
+app/firebase-service.json
+.git
