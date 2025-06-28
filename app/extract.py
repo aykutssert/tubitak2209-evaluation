@@ -208,8 +208,3 @@ def extract_full_2209a_structure(file_path):
 
 
     return result
-
-
-# data = extract_full_2209a_structure("testWord.docx")
-# import json
-# print(json.dumps(data, indent=4, ensure_ascii=False))

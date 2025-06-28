@@ -83,17 +83,11 @@ def register():
 
 @app.route("/")
 def index():
-    return render_template("index.html")  # templates klasöründen index.html yüklenir
+    return render_template("index.html") 
 
 @app.route("/settings", methods=["GET"])
 def settings():
-    return render_template("settings.html")  # templates klasöründen settings.html yüklenir
-
-
-
-
-
-
+    return render_template("settings.html") 
 
 @app.route("/upload", methods=["POST"])
 @verify_firebase_token
@@ -112,25 +106,17 @@ def upload():
     file.save(filepath)
 
     try:
-        # Veriyi çıkar
+   
         data = extract_full_2209a_structure(filepath)
-       
 
-        # Değerlendirme kurallarını yükle
         with open(RUBRIC_PATH, "r", encoding="utf-8") as f:
             rubric = json.load(f)
 
-
-        # Kullanıcıdan gelen model ve engine bilgilerini al
-        engine = request.form.get("engine", "api")  # api veya local
+        engine = request.form.get("engine", "api")  
         model = request.form.get("model", "gpt-4o-mini-2024-07-18")
 
-
-        # Değerlendirme sonucunu al
         result = evaluate(data, rubric, engine=engine, model=model)
 
-
-        # 🔽 Temizleme fonksiyonu
         def temizle_cevap(yanit: str) -> str:
             if not yanit or not isinstance(yanit, str):
                 return ""
@@ -149,18 +135,13 @@ def upload():
                 return f"{cevap}, {gerekce}"
             return cevap
 
-        # 🔁 Tüm cevapları temizle
         for section, questions in result.get("answers", {}).items():
             for question, yanit in questions.items():
                 result["answers"][section][question] = temizle_cevap(yanit)
 
-
-
-        # Sonucu Firestore'a kaydet
         answers = result.get("answers", {})
         scores = result.get("section_scores", {})
 
-        # Total max score hesapla (her soru 5 puan)
         total_max_score = 0
         for section, questions in answers.items():
             question_count = len(questions)
@@ -173,14 +154,12 @@ def upload():
             'answers': answers,
             'scores': scores,
             'totalScore': sum(scores.values()),
-            'totalMaxScore': total_max_score,  # ← Bu satırı ekleyin
+            'totalMaxScore': total_max_score,  
             'completed': True,
             'createdAt': firestore.SERVER_TIMESTAMP
         }
         
         db.collection('users').document(user_id).collection('projects').add(project_data)
-
-        # Dosyayı kaldır
         os.remove(filepath)
 
         return jsonify(result)
@@ -189,10 +168,6 @@ def upload():
         if os.path.exists(filepath):
             os.remove(filepath)
         return jsonify({"error": f"Hata oluştu: {str(e)}"}), 500
-
-
-
-# app.py - güncellenmiş /ask route'u
 
 @app.route("/ask", methods=["POST"])
 @verify_firebase_token
@@ -206,7 +181,6 @@ def ask_with_context():
     question = request.form['question'].strip()
     model = request.form.get("model", "gpt-4o-mini")
 
-    # Input validation
     if not question:
         return jsonify({"error": "Soru boş olamaz."}), 400
     
@@ -222,15 +196,14 @@ def ask_with_context():
 
     try:
         print(f"Processing question: {question[:50]}...")
-        
-        # 1. Dosyayı işle
+
         data = extract_full_2209a_structure(filepath)
         
         if not data:
             os.remove(filepath)
             return jsonify({"error": "Doküman içeriği okunamadı."}), 400
-        
-        # 2. Section'ları embed et
+
+
         embedded_chunks = rag_system.embed_sections_with_local_model(data)
         
         if not embedded_chunks:
@@ -239,28 +212,23 @@ def ask_with_context():
 
         print(f"Found {len(embedded_chunks)} chunks")
 
-        # 3. En iyi eşleşen bölümleri bul - enhanced version
         best_matches = rag_system.find_best_matches_enhanced(question, embedded_chunks, top_k=5)
-        
-        # Debug info
+
         if best_matches:
             print(f"Best matches:")
             for i, match in enumerate(best_matches[:3]):
                 print(f"  {i+1}. {match['section']}: similarity={match['similarity']:.3f}, combined={match.get('combined_score', 0):.3f}")
-        
-        # Değişken başlatma
+
         answer = ""
         best_section = "N/A"
         similarity = 0.0
         
-        # Adaptive threshold based on question type
         if any(word in question.lower() for word in ['nedir', 'ne', 'nasıl', 'hangi', 'kim', 'neden']):
-            threshold = 0.15  # Genel sorular için düşük threshold
+            threshold = 0.15 
         else:
-            threshold = 0.25  # Spesifik sorular için yüksek threshold
+            threshold = 0.25  
         
         if not best_matches or best_matches[0]["combined_score"] < threshold:
-            # Düşük similarity durumunda - daha helpful response
             if best_matches:
                 available_sections = [match['section'] for match in best_matches[:3]]
                 answer = f"""Bu soruya doküman içeriğinde tam olarak uygun bilgi bulunamadı. 
@@ -277,7 +245,6 @@ def ask_with_context():
             best_section = "Bilgi bulunamadı"
             similarity = best_matches[0]["similarity"] if best_matches else 0.0
         else:
-            # 4. GPT'ye sor - en iyi 2-3 chunk ile
             try:
                 print("Calling OpenAI...")
                 answer = rag_system.ask_openai(question, best_matches[:3], model=model)
@@ -286,7 +253,6 @@ def ask_with_context():
                 print("OpenAI response received")
             except Exception as openai_error:
                 print(f"OpenAI Error: {openai_error}")
-                # Fallback response
                 answer = f"""OpenAI servisi geçici olarak kullanılamıyor. 
 
 📍 En ilgili bölüm: {best_matches[0]['section']}
@@ -296,7 +262,6 @@ def ask_with_context():
                 best_section = best_matches[0]['section']
                 similarity = best_matches[0]["similarity"]
 
-        # 5. Firestore'a kaydet
         project_data = {
             'fileName': file.filename,
             'mode': 'rag',
@@ -310,11 +275,8 @@ def ask_with_context():
             'completed': True,
             'createdAt': firestore.SERVER_TIMESTAMP
         }
-
-        # Collection name fix: 'projects' not 'rags'
         db.collection('users').document(user_id).collection('rags').add(project_data)
 
-        # Dosyayı kaldır
         os.remove(filepath)
 
         return jsonify({
@@ -330,8 +292,7 @@ def ask_with_context():
         print(f"General Error: {e}")
         if os.path.exists(filepath):
             os.remove(filepath)
-        
-        # User-friendly error messages
+
         error_message = "Beklenmeyen bir hata oluştu."
         if "embedding" in str(e).lower():
             error_message = "Doküman analizi sırasında hata oluştu."

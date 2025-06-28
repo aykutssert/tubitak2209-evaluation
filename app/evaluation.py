@@ -9,14 +9,7 @@ load_dotenv()
 
 from openai import OpenAI
 
-
-
-# HTTP bağlantılarını yeniden kullanmak için Session oluştur
 session = requests.Session()
-
-
-
-
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
@@ -100,7 +93,6 @@ def parse_response_by_section(response, questions):
     if current_lines and current_idx - 2 < len(questions):
         result[questions[current_idx - 2]] = "\n".join(current_lines).strip()
 
-    # Eksik sorular için varsayılan değer
     for i, q in enumerate(questions):
         if q not in result:
             result[q] = "Cevap: Kısmen\nGerekçe: Yanıt alınamadı."
@@ -116,7 +108,7 @@ def score_answer(answer):
     elif "hayır" in lowered:
         return 0
     else:
-        return 0  # Varsayılan olarak 0 puan
+        return 0 
 
 def evaluate_summary_manually(content_dict):
     """Özet bölümünü manuel olarak değerlendirir."""
@@ -186,8 +178,7 @@ def evaluate(data, rubric, engine="api", model="gpt-4o-mini-2024-07-18"):
             full_result[section] = combined_result
             section_scores[section] = sum(score_answer(ans) for ans in combined_result.values())
 
-    # Thread pool ile paralel çalıştırma
-    with ThreadPoolExecutor(max_workers=10) as executor:  # max_workers sistem kaynaklarına göre ayarlanabilir
+    with ThreadPoolExecutor(max_workers=10) as executor:  
         executor.map(lambda args: evaluate_section(*args), [(section, questions) for section, questions in rubric.items()])
 
     return {
